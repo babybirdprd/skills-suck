@@ -35,6 +35,6 @@ skills-suck --output MY_AGENTS.md
 ```
 
 ## Philosophy
-We believe skills are for **humans to organize**, but `AGENTS.md` is for **machines to execute**. `skills-suck` bridges that gap by automating the compilation of your organizational structure into an optimized ماشين-readable format.
+We believe skills are for **humans to organize**, but `AGENTS.md` is for **machines to execute**. `skills-suck` bridges that gap by automating the compilation of your organizational structure into an optimized machine-readable format.
 
 ---
