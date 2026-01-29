@@ -8,38 +8,66 @@ pub struct Indexer;
 impl Indexer {
     pub fn generate_project_index(ctx: &ProjectContext) -> String {
         let files = Self::get_all_files(ctx.root, Some(ctx.output_file));
-        let minified = Self::minify_paths(files);
+        // Filter out .agent directory from main project index to avoid duplication
+        let files: Vec<String> = files
+            .into_iter()
+            .filter(|f| !f.starts_with(".agent/") && !f.starts_with(".agent\\"))
+            .collect();
 
-        let header = format!(
-            "[Project Index]|root: ./|IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning"
+        let minified_parts = Self::minify_paths(files);
+
+        let mut lines = Vec::new();
+        lines.push("[Project Index]|root: ./".to_string());
+        lines.push(
+            "|IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning"
+                .to_string(),
         );
 
+        for part in minified_parts {
+            lines.push(format!("|{}", part));
+        }
+
         format!(
-            "<!-- PROJECTS-MD-START -->\n{}|{}\n<!-- PROJECTS-MD-END -->",
-            header, minified
+            "<!-- PROJECT-INDEX-START -->\n{}\n<!-- PROJECT-INDEX-END -->",
+            lines.join("\n")
         )
     }
 
-    pub fn generate_skill_index(skill: &Skill) -> String {
+    pub fn generate_skill_index(skill: &Skill, project_root: &Path) -> String {
         let files = Self::get_all_files(&skill.path, None);
+        // Filter out SKILL.md as it is embedded directly content-wise
+        let files: Vec<String> = files
+            .into_iter()
+            .filter(|f| !f.ends_with("SKILL.md"))
+            .collect();
+
         if files.is_empty() {
             return String::new();
         }
 
-        let minified = Self::minify_paths(files);
-        let tag_name = skill.metadata.name.to_uppercase().replace("-", "_");
+        let minified_parts = Self::minify_paths(files);
 
-        let header = format!(
-            "[{} Index]|root: {}|IMPORTANT: Use these tools for {} tasks",
-            skill.metadata.name,
-            skill.path.display().to_string().replace("\\", "/"),
+        let path_str = if let Ok(rel) = skill.path.strip_prefix(project_root) {
+            format!("./{}", rel.to_string_lossy().replace("\\", "/"))
+        } else {
+            skill.path.display().to_string().replace("\\", "/")
+        };
+
+        let mut lines = Vec::new();
+        lines.push(format!(
+            "[{} Index]|root: {}",
+            skill.metadata.name, path_str
+        ));
+        lines.push(format!(
+            "|IMPORTANT: Use these tools for {} tasks",
             skill.metadata.name
-        );
+        ));
 
-        format!(
-            "<!-- {}-START -->\n{}|{}\n<!-- {}-END -->",
-            tag_name, header, minified, tag_name
-        )
+        for part in minified_parts {
+            lines.push(format!("|{}", part));
+        }
+
+        lines.join("\n")
     }
 
     fn get_all_files(root: &Path, exclude_output: Option<&Path>) -> Vec<String> {
@@ -72,9 +100,7 @@ impl Indexer {
                         }
                     }
                     let path_str = rel_path.to_string_lossy().replace("\\", "/");
-                    if path_str == "SKILL.md" {
-                        continue;
-                    }
+
                     paths.push(path_str);
                 }
             }
@@ -82,7 +108,7 @@ impl Indexer {
         paths
     }
 
-    fn minify_paths(paths: Vec<String>) -> String {
+    fn minify_paths(paths: Vec<String>) -> Vec<String> {
         let mut groups: HashMap<String, Vec<String>> = HashMap::new();
 
         for path in paths {
@@ -115,6 +141,6 @@ impl Indexer {
             }
         }
 
-        parts.join("|")
+        parts
     }
 }

@@ -23,19 +23,33 @@ impl<'a> Compiler<'a> {
                 ".claude/skills",
                 ".cursor/skills",
             ],
-            start_tag: "<!-- SKILLS-COMPILER-START -->",
-            end_tag: "<!-- SKILLS-COMPILER-END -->",
+            start_tag: "<!-- AGENTS-INDEX-START -->",
+            end_tag: "<!-- AGENTS-INDEX-END -->",
         }
     }
 
     pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
         let skills = self.discover_skills();
         let project_index = Indexer::generate_project_index(&self.ctx);
-        let skill_content = self.aggregate_skills(&skills);
+
+        let mut skill_sections = String::new();
+        for skill in &skills {
+            let index = Indexer::generate_skill_index(skill, self.ctx.root);
+
+            skill_sections.push_str(&format!(
+                "### {}\n\n{}\n\n{}\n\n---\n\n",
+                skill.metadata.name,
+                index,         // Compressed index of supplemental files
+                skill.content  // Actual SKILL.md content
+            ));
+        }
 
         let compiled_section = format!(
-            "{}\n\n{}\n\n{}\n\n{}",
-            self.start_tag, project_index, skill_content, self.end_tag
+            "{}\n\n{}\n\n{}\n{}",
+            self.start_tag,
+            project_index,
+            skill_sections.trim_end(),
+            self.end_tag
         );
 
         let output_path = self.ctx.root.join(self.ctx.output_file);
@@ -125,17 +139,5 @@ impl<'a> Compiler<'a> {
                 .into_owned(),
             description: "No description provided".to_string(),
         }
-    }
-
-    fn aggregate_skills(&self, skills: &[Skill]) -> String {
-        let mut aggregated = String::from("## Compiled Skills\n\n");
-        for skill in skills {
-            let skill_index = Indexer::generate_skill_index(skill);
-            aggregated.push_str(&format!(
-                "### Skill: {}\n\n{}\n\n{}\n\n---\n\n",
-                skill.metadata.name, skill_index, skill.content
-            ));
-        }
-        aggregated
     }
 }
