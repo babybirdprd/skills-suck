@@ -11,7 +11,7 @@ Modular skills (like those in `.agent/skills` or `.claude/skills`) are great for
 ## Features
 - **Minified Indexing**: Groups files by directory using a dense string format (`dir:{f1,f2}`).
 - **Safe Updates**: Uses marker tags (`<!-- SKILLS-COMPILER-START -->`) to update `AGENTS.md` without overwriting your manual notes.
-- **Multi-Spec Support**: Discovers skills from `.agent`, `.gemini`, `.claude`, and `.cursor`.
+- **Multi-Spec Support**: Discovers skills from over 20+ tools including Amazon Q, Antigravity, Auggie, Claude Code, Cline, CodeBuddy, Codex, Continue, CoStrict, Crush, Cursor, Factory Droid, Gemini CLI, GitHub Copilot, iFlow, Kilo Code, OpenCode, Qoder, Qwen Code, RooCode, Trae, and Windsurf.
 - **Rust-Powered**: Fast, reliable, and modular implementation.
 
 ## Installation

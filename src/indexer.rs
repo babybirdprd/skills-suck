@@ -11,7 +11,30 @@ impl Indexer {
         // Filter out .agent directory from main project index to avoid duplication
         let files: Vec<String> = files
             .into_iter()
-            .filter(|f| !f.starts_with(".agent/") && !f.starts_with(".agent\\"))
+            .filter(|f| {
+                !f.starts_with(".amazonq/")
+                    && !f.starts_with(".agent/")
+                    && !f.starts_with(".augment/")
+                    && !f.starts_with(".claude/")
+                    && !f.starts_with(".cline/")
+                    && !f.starts_with(".codebuddy/")
+                    && !f.starts_with(".codex/")
+                    && !f.starts_with(".continue/")
+                    && !f.starts_with(".cospec/")
+                    && !f.starts_with(".crush/")
+                    && !f.starts_with(".cursor/")
+                    && !f.starts_with(".factory/")
+                    && !f.starts_with(".gemini/")
+                    && !f.starts_with(".github/")
+                    && !f.starts_with(".iflow/")
+                    && !f.starts_with(".kilocode/")
+                    && !f.starts_with(".opencode/")
+                    && !f.starts_with(".qoder/")
+                    && !f.starts_with(".qwen/")
+                    && !f.starts_with(".roo/")
+                    && !f.starts_with(".trae/")
+                    && !f.starts_with(".windsurf/")
+            })
             .collect();
 
         let minified_parts = Self::minify_paths(files);
@@ -76,10 +99,28 @@ impl Indexer {
         let walker = WalkDir::new(root).into_iter().filter_entry(|e| {
             let name = e.file_name().to_str().unwrap_or("");
             if name.starts_with('.')
+                && name != ".amazonq"
                 && name != ".agent"
-                && name != ".gemini"
+                && name != ".augment"
                 && name != ".claude"
+                && name != ".cline"
+                && name != ".codebuddy"
+                && name != ".codex"
+                && name != ".continue"
+                && name != ".cospec"
+                && name != ".crush"
                 && name != ".cursor"
+                && name != ".factory"
+                && name != ".gemini"
+                && name != ".github"
+                && name != ".iflow"
+                && name != ".kilocode"
+                && name != ".opencode"
+                && name != ".qoder"
+                && name != ".qwen"
+                && name != ".roo"
+                && name != ".trae"
+                && name != ".windsurf"
             {
                 return false;
             }
